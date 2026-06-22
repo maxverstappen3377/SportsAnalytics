@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.local
+.env.*.local
+
+# Next.js
+.next/
+out/
+build/
+node_modules/
+
+# Docker
+.docker-volumes/
+
+# Models & Media
+*.mp4
+*.avi
+*.mkv
+ml/data/raw/
+backend/cv_worker/vendor/tracknetv3/weights/
+backend/analytics_svc/models/
+ml/eval/plots/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

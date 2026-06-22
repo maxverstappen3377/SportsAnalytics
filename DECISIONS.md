@@ -1,0 +1,38 @@
+# Decisions Log - Badminton Performance Analytics System
+
+## Project Start: 2026-06-22
+
+### 1. Environment and Hardware Diagnostics
+- **Python Version**: System Python is `3.14.0`. We will use standard python tools (venv) and ensure code is fully compatible.
+- **Node/NPM**: Node `v25.2.0`, NPM `10.8.1`
+- **Docker**: Version `28.3.3`
+- **GPU**: NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM).
+
+### 2. VRAM Mitigation Plan
+The project requirements specify a minimum of 8GB VRAM for concurrent tracking, detection, pose estimation, and stroke classification. Since we have a 4GB VRAM constraint, we will:
+1. **Model Selection**: Use YOLOv8-nano (the smallest detection model) to minimize detection footprint.
+2. **Quantization & Execution Engine**: Quantize TrackNetV3 and YOLOv8 models to FP16/INT8 ONNX. Load and execute models sequentially in a single process rather than in parallel Celery tasks, calling `torch.cuda.empty_cache()` and garbage collection (`gc.collect()`) after each inference stage.
+3. **CPU Fallback**: Support a `FORCE_CPU=true` environment flag to completely run CV stages on the CPU if memory limits are exceeded.
+4. **Profiling**: Measure peak VRAM usage during CV execution.
+
+### 3. Database Selection
+We will use Postgres `pgvector/pgvector:pg16` to support the `vector` type for rally similarity search using HNSW indexing.
+
+### 4. Dependency Management
+We will use `uv` for managing python packages in the backend due to its high performance and robust dependency resolution.
+
+### 5. Docker Desktop Blocker & Testing Strategy
+- **Blocker**: The Docker Desktop service `com.docker.service` is stopped on the Windows host and cannot be started without administrative elevation. This prevents starting the Docker containers (`docker compose up -d`) in the local environment.
+- **Strategy**:
+  1. We will write fully-ready-to-run docker-compose configs, Dockerfiles, and Alembic migrations.
+  2. For the test suite, we will use a testing DB setup that supports a SQLite backend as a fallback, mocking the pgvector operations (like cosine similarity search) in-memory using python/numpy.
+  3. We will build the application such that it connects to PostgreSQL in production/local-docker setups, but falls back to SQLite for unit testing or when run in a database-less sandbox.
+### 6. Phase 0 Ingestion Verification (ShuttleSet)
+The ShuttleSet dataset was successfully parsed, normalized, and ingested into the SQLite database.
+- **Verification Date**: 2026-06-22
+- **Row Counts Achieved**:
+  - **Players**: 27 (matches the 27 top-ranked singles players in ShuttleSet metadata)
+  - **Matches**: 44
+  - **Sets**: 104 (100% match with published dataset: 104 sets)
+  - **Rallies**: 3,683 (compared to 3,685 published; 2 rallies excluded due to missing/empty raw rows)
+  - **Shots**: 36,484 (compared to 36,492 published; 8 shots excluded due to missing coordinates/formatting in raw files)
