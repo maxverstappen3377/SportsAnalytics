@@ -40,3 +40,7 @@ The ShuttleSet dataset was successfully parsed, normalized, and ingested into th
 ## Phase 0 Status Summary
 Phase 0 has been completed successfully. We initialized the Git repository and set up a multi-service `docker-compose` topology. We implemented database models in SQLAlchemy/SQLModel covering the complete Player-Match-Set-Rally-Shot hierarchy, created migrations, and successfully verified them on SQLite. Finally, we cloned the `CoachAI-Projects` repository using NTFS-bypass configurations, wrote the `ingest_shuttleset.py` script, and successfully parsed and loaded all 44 matches (104 sets, 3,683 rallies, and 36,484 shots) into our local database, verifying the outputs match the published statistics.
 
+## Phase 1 Status Summary
+Phase 1 has been completed successfully. We vendored and cloned the `TrackNetV3` model repository and configured `ultralytics` for YOLOv8 player detection. We designed modular wrappers `ShuttleTracker` and `PlayerDetector` supporting both GPU execution (with <3.5GB peak VRAM alerts and cache clearing) and physics-based mock trajectories when weights are absent. Additionally, we implemented a homography mapping utility using OpenCV that converts pixel coordinate bounding box centers to normalized court spaces (`[0,1] x [0,1]`), and built the Stage 1 Celery task `process_match_cv_stage1` which chains into Stage 2. We wrote comprehensive unit tests for all components, achieving 100% test success across database insertions and task executions.
+
+
