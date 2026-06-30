@@ -43,4 +43,8 @@ Phase 0 has been completed successfully. We initialized the Git repository and s
 ## Phase 1 Status Summary
 Phase 1 has been completed successfully. We vendored and cloned the `TrackNetV3` model repository and configured `ultralytics` for YOLOv8 player detection. We designed modular wrappers `ShuttleTracker` and `PlayerDetector` supporting both GPU execution (with <3.5GB peak VRAM alerts and cache clearing) and physics-based mock trajectories when weights are absent. Additionally, we implemented a homography mapping utility using OpenCV that converts pixel coordinate bounding box centers to normalized court spaces (`[0,1] x [0,1]`), and built the Stage 1 Celery task `process_match_cv_stage1` which chains into Stage 2. We wrote comprehensive unit tests for all components, achieving 100% test success across database insertions and task executions.
 
+## Phase 2 Status Summary
+Phase 2 has been completed successfully. We cloned the `Badminton Stroke-type Transformer (BST)` model repository, inspected its dataset preparation structure, and developed Python wrappers for `PoseEstimator` (delivering 17 keypoint COCO positions relative to detection boxes) and `StrokeClassifier` (classifying stroke trajectories using sequence-wise rules and mock fallbacks). We implemented the rally segmentation algorithm in `rally_segmentation.py` using a 2.5-second gap detection threshold over shuttle trajectories, and fully integrated these parts into the Stage 2 Celery task `process_match_cv_stage2`. The entire pipeline now executes end-to-end, writing Set, Rally, and Shot objects into the database, verified by unit tests with 100% success.
+
+
 

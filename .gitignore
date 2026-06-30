@@ -16,20 +16,20 @@ out/
 build/
 node_modules/
 
-# Docker
-.docker-volumes/
-
-# Models & Media
+# Local databases and uploads
+*.db
+badminton.db
+public/uploads/
 *.mp4
 *.avi
 *.mkv
-ml/data/raw/
-backend/cv_worker/vendor/tracknetv3/weights/
-backend/analytics_svc/models/
-ml/eval/plots/
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# Large binary weights & local system DLLs
+*.pt
+*.dll
