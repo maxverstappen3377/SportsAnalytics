@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, Depends, HTTPException, status, Query, BackgroundTasks, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from sqlmodel import Session, select, func
 
 from src.pipeline.database import engine, init_db, get_db
@@ -555,5 +555,23 @@ def predict_next_shot(payload: Dict[str, Any]):
 @app.get("/api/v1/rallies/{rally_id}/similar")
 def get_similar_rallies(rally_id: UUID, db: Session = Depends(get_db)):
     return []
+
+# --- FRONTEND STATIC EXPORT SERVING ---
+frontend_dist_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "out"))
+
+if os.path.exists(frontend_dist_path):
+    _next_dir = os.path.join(frontend_dist_path, "_next")
+    if os.path.exists(_next_dir):
+        app.mount("/_next", StaticFiles(directory=_next_dir), name="next-assets")
+    
+    @app.get("/{catchall:path}")
+    async def serve_frontend(catchall: str):
+        file_path = os.path.join(frontend_dist_path, catchall)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        index_file = os.path.join(frontend_dist_path, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Static asset not found")
 
 
