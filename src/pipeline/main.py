@@ -143,7 +143,7 @@ def create_match(payload: MatchCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="One or both players not found.")
 
     match_id = uuid4()
-    upload_url = f"http://127.0.0.1:8001/api/v1/matches/{match_id}/video/upload"
+    upload_url = f"/api/v1/matches/{match_id}/video/upload"
 
     match = Match(
         match_id=match_id,
