@@ -37,6 +37,7 @@ export default function Dashboard() {
     const [showSkeleton, setShowSkeleton] = useState(true);
     const [showSpeedTrail, setShowSpeedTrail] = useState(true);
     const [showMiniMap, setShowMiniMap] = useState(true);
+    const [highlightedFrame, setHighlightedFrame] = useState<number | null>(null);
 
     // Load matches list on mount
     useEffect(() => {
@@ -388,6 +389,48 @@ export default function Dashboard() {
         }
     };
 
+    const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        if (!canvas || !video || trajectories.length === 0) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        // Pass click through to video controls if clicked in the bottom 15% of the video
+        if (clickY > rect.height * 0.85) {
+            return;
+        }
+        
+        let closestPt: any = null;
+        let minDistance = Infinity;
+        
+        trajectories.forEach(pt => {
+            if (pt.pixel_x !== null && pt.pixel_y !== null) {
+                const cx = (pt.pixel_x / video.videoWidth) * canvas.width;
+                const cy = (pt.pixel_y / video.videoHeight) * canvas.height;
+                const dist = Math.sqrt((cx - clickX) ** 2 + (cy - clickY) ** 2);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestPt = pt;
+                }
+            }
+        });
+        
+        if (closestPt && minDistance < 45) {
+            const computedTime = closestPt.frame_number / (selectedMatch?.fps || 30.0);
+            video.currentTime = computedTime;
+            setPlaybackMs(computedTime * 1000);
+            setHighlightedFrame(closestPt.frame_number);
+            
+            const rowEl = document.getElementById(`row-${closestPt.frame_number}`);
+            if (rowEl) {
+                rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
+
     const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
         const video = e.currentTarget;
         const currentMs = video.currentTime * 1000;
@@ -547,7 +590,8 @@ export default function Dashboard() {
                             {/* Dynamic HTML5 Canvas Overlay */}
                             <canvas
                                 ref={canvasRef}
-                                className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                                onClick={handleCanvasClick}
+                                className="absolute top-0 left-0 w-full h-full cursor-crosshair z-30"
                             />
                             
                             {/* Contextual HUD Overlay (Fades out after 2s) */}
@@ -615,12 +659,16 @@ export default function Dashboard() {
                                     ) : trajectories && trajectories.length > 0 ? (
                                         trajectories.map((t) => {
                                             const currentFrame = Math.round((playbackMs / 1000) * (selectedMatch?.fps || 30.0));
-                                            const isActive = currentFrame === t.frame_number;
+                                            const isActive = currentFrame === t.frame_number || highlightedFrame === t.frame_number;
                                             return (
                                                 <tr 
                                                     key={t.frame_number} 
-                                                    onClick={() => handleSeek(t.frame_number * (1000 / (selectedMatch?.fps || 30.0)))}
-                                                    className={`hover:bg-zinc-900/40 cursor-pointer ${isActive ? "bg-indigo-950/40 text-indigo-300" : ""}`}
+                                                    id={`row-${t.frame_number}`}
+                                                    onClick={() => {
+                                                        handleSeek(t.frame_number * (1000 / (selectedMatch?.fps || 30.0)));
+                                                        setHighlightedFrame(t.frame_number);
+                                                    }}
+                                                    className={`hover:bg-zinc-900/40 cursor-pointer transition-all ${isActive ? "bg-indigo-950/40 text-indigo-300 font-bold border-l-2 border-indigo-500" : ""}`}
                                                 >
                                                     <td className="p-3 font-bold">{t.frame_number}</td>
                                                     <td className="p-3">
