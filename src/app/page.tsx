@@ -389,16 +389,16 @@ export default function Dashboard() {
         }
     };
 
-    const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
         const canvas = canvasRef.current;
         const video = videoRef.current;
         if (!canvas || !video || trajectories.length === 0) return;
         
-        const rect = canvas.getBoundingClientRect();
+        const rect = e.currentTarget.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const clickY = e.clientY - rect.top;
         
-        // Pass click through to video controls if clicked in the bottom 15% of the video
+        // Pass click through to video controls if clicked in the bottom controls bar area (15% height)
         if (clickY > rect.height * 0.85) {
             return;
         }
@@ -418,7 +418,7 @@ export default function Dashboard() {
             }
         });
         
-        if (closestPt && minDistance < 45) {
+        if (closestPt && minDistance < 40) {
             const computedTime = closestPt.frame_number / (selectedMatch?.fps || 30.0);
             video.currentTime = computedTime;
             setPlaybackMs(computedTime * 1000);
@@ -427,6 +427,13 @@ export default function Dashboard() {
             const rowEl = document.getElementById(`row-${closestPt.frame_number}`);
             if (rowEl) {
                 rowEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        } else {
+            // General click plays/pauses the video cleanly
+            if (video.paused) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
             }
         }
     };
@@ -577,7 +584,10 @@ export default function Dashboard() {
                                 </button>
                             </div>
                         </div>
-                        <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-zinc-800 group">
+                        <div 
+                            onClick={handleContainerClick}
+                            className="relative aspect-video bg-black rounded-xl overflow-hidden border border-zinc-800 group cursor-pointer"
+                        >
                             <video
                                 key={getVideoUrl(selectedMatch)}
                                 ref={videoRef}
@@ -590,8 +600,7 @@ export default function Dashboard() {
                             {/* Dynamic HTML5 Canvas Overlay */}
                             <canvas
                                 ref={canvasRef}
-                                onClick={handleCanvasClick}
-                                className="absolute top-0 left-0 w-full h-full cursor-crosshair z-30"
+                                className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
                             />
                             
                             {/* Contextual HUD Overlay (Fades out after 2s) */}
