@@ -10,12 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     libglib2.0-0 \
     libgomp1 \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
+    libxcb1 \
+    libxkbcommon0 \
     && rm -rf /var/lib/apt/lists/*
+
+# Set environment variable for headless OpenCV
+ENV OPENBLAS_NUM_THREADS=1
+ENV OMP_NUM_THREADS=1
 
 # 1. Install Python dependencies
 COPY requirements.txt .
