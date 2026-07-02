@@ -7,6 +7,8 @@ from sqlalchemy import String, Date, DateTime, Numeric, Float, Boolean, text
 
 # Check if using SQLite based on environment variable
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///badminton.db")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 IS_SQLITE = DATABASE_URL.startswith("sqlite")
 
 class Player(SQLModel, table=True):

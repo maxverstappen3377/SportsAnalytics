@@ -53,6 +53,10 @@ ENV LIBGL_ALWAYS_INDIRECT=1
 ENV QT_QPA_PLATFORM=offscreen
 ENV DISPLAY=""
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Pre-install CPU-only PyTorch to minimize build size and prevent out-of-memory errors on Render
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
 # Install Python dependencies
 COPY requirements.txt .
