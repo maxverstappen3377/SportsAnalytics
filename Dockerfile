@@ -4,6 +4,7 @@ FROM nikolaik/python-nodejs:python3.11-nodejs20-slim
 WORKDIR /app
 
 # Install comprehensive system dependencies for OpenCV, torch, and headless operation
+# Including libgl1 which provides libGL.so.1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
@@ -20,6 +21,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxinerama1 \
     libfontconfig1 \
     fontconfig-config \
+    libgl1 \
+    libglx0 \
+    libxdamage1 \
+    libxfixes3 \
+    libxxf86vm1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for headless and GPU-less operation
@@ -28,6 +34,8 @@ ENV OMP_NUM_THREADS=1
 ENV CUDA_VISIBLE_DEVICES=""
 ENV LIBGL_ALWAYS_INDIRECT=1
 ENV QT_QPA_PLATFORM=offscreen
+ENV DISPLAY=""
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGL.so.1
 
 # 1. Install Python dependencies
 COPY requirements.txt .

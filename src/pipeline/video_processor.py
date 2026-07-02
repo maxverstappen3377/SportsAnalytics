@@ -4,6 +4,7 @@ import sys
 # Set headless mode BEFORE any OpenCV or display-related imports
 os.environ["DISPLAY"] = ""
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
+os.environ["LIBGL_ALWAYS_INDIRECT"] = "1"
 
 # Disable Ultralytics requirement checking and auto-updates
 os.environ["CHECK_UPDATES"] = "False"
@@ -15,10 +16,14 @@ try:
 except Exception as e:
     print(f"[Processor Warning] Failed to monkeypatch check_requirements: {e}")
 
-import cv2
-import cv2.cv2 as cv2_module
-# Set OpenCV to use headless backend
-cv2.ocl.setUseOpenCL(False)
+# Import cv2 with headless configuration
+try:
+    import cv2
+    cv2.ocl.setUseOpenCL(False)
+    print("[Processor] OpenCV initialized in headless mode")
+except ImportError as e:
+    print(f"[Processor Error] Failed to import cv2: {e}")
+    raise
 
 import math
 import torch
