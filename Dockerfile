@@ -3,12 +3,8 @@ FROM debian:bookworm
 
 WORKDIR /app
 
-# Install Node.js 20
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# Install Node.js 20 by copying from official Node image
+COPY --from=node:20-slim /usr/local /usr/local
 
 # Install Python 3.11 with all system dependencies in one go
 RUN apt-get update && apt-get install -y --no-install-recommends \
