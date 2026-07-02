@@ -3,7 +3,7 @@ FROM nikolaik/python-nodejs:python3.11-nodejs20-slim
 
 WORKDIR /app
 
-# Install system dependencies required for OpenCV and other packages
+# Install comprehensive system dependencies for OpenCV, torch, and headless operation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
@@ -12,11 +12,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     libxcb1 \
     libxkbcommon0 \
+    libxkbcommon-x11-0 \
+    libxrender1 \
+    libx11-6 \
+    libxrandr2 \
+    libxi6 \
+    libxinerama1 \
+    libfontconfig1 \
+    fontconfig-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variable for headless OpenCV
+# Set environment variables for headless and GPU-less operation
 ENV OPENBLAS_NUM_THREADS=1
 ENV OMP_NUM_THREADS=1
+ENV CUDA_VISIBLE_DEVICES=""
+ENV LIBGL_ALWAYS_INDIRECT=1
+ENV QT_QPA_PLATFORM=offscreen
 
 # 1. Install Python dependencies
 COPY requirements.txt .
