@@ -112,6 +112,33 @@ def localize_motion_streak(prev_gray: np.ndarray, curr_gray: np.ndarray) -> Opti
         pass
     return None
 
+class BoundingBox:
+    def __init__(self, x_min: float, y_min: float, x_max: float, y_max: float, confidence: float, class_id: int):
+        self.x_min = x_min
+        self.y_min = y_min
+        self.x_max = x_max
+        self.y_max = y_max
+        self.confidence = confidence
+        self.class_id = class_id
+
+class PoseKeypoint:
+    def __init__(self, name: str, index: int, x: float, y: float, score: float):
+        self.name = name
+        self.index = index
+        self.x = x
+        self.y = y
+        self.score = score
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"name": self.name, "index": self.index, "x": self.x, "y": self.y, "score": self.score}
+
+COCO_KEYPOINTS = [
+    "nose", "left_eye", "right_eye", "left_ear", "right_ear",
+    "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
+    "left_wrist", "right_wrist", "left_hip", "right_hip",
+    "left_knee", "right_knee", "left_ankle", "right_ankle"
+]
+
 # ----------------- KINEMATIC POSTURE CONSTRAINTS -----------------
 class KinematicConstraintFilter:
     def __init__(self):
@@ -368,32 +395,7 @@ class ShuttlePoint:
         self.landing_y = landing_y
         self.time_to_landing = time_to_landing
 
-class BoundingBox:
-    def __init__(self, x_min: float, y_min: float, x_max: float, y_max: float, confidence: float, class_id: int):
-        self.x_min = x_min
-        self.y_min = y_min
-        self.x_max = x_max
-        self.y_max = y_max
-        self.confidence = confidence
-        self.class_id = class_id
 
-class PoseKeypoint:
-    def __init__(self, name: str, index: int, x: float, y: float, score: float):
-        self.name = name
-        self.index = index
-        self.x = x
-        self.y = y
-        self.score = score
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {"name": self.name, "index": self.index, "x": self.x, "y": self.y, "score": self.score}
-
-COCO_KEYPOINTS = [
-    "nose", "left_eye", "right_eye", "left_ear", "right_ear",
-    "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
-    "left_wrist", "right_wrist", "left_hip", "right_hip",
-    "left_knee", "right_knee", "left_ankle", "right_ankle"
-]
 
 class ShuttleTracker:
     def __init__(self, model_path: str = "model_best.pt", force_cpu: bool = False):
