@@ -1,10 +1,4 @@
 import os
-import sys
-
-# Set headless mode BEFORE any OpenCV or display-related imports
-os.environ["DISPLAY"] = ""
-os.environ["QT_QPA_PLATFORM"] = "offscreen"
-
 import shutil
 import numpy as np
 import asyncio
